@@ -1,20 +1,138 @@
-// LCS.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
 
-int main()
+class Spell {
+private:
+	string scrollName;
+public:
+	Spell() : scrollName("") { }
+	Spell(string name) : scrollName(name) { }
+	virtual ~Spell() { }
+	string revealScrollName() {
+		return scrollName;
+	}
+};
+
+class Fireball : public Spell {
+private: int power;
+public:
+	Fireball(int power) : power(power) { }
+	void revealFirepower() {
+		cout << "Fireball: " << power << endl;
+	}
+};
+
+class Frostbite : public Spell {
+private: int power;
+public:
+	Frostbite(int power) : power(power) { }
+	void revealFrostpower() {
+		cout << "Frostbite: " << power << endl;
+	}
+};
+
+class Thunderstorm : public Spell {
+private: int power;
+public:
+	Thunderstorm(int power) : power(power) { }
+	void revealThunderpower() {
+		cout << "Thunderstorm: " << power << endl;
+	}
+};
+
+class Waterbolt : public Spell {
+private: int power;
+public:
+	Waterbolt(int power) : power(power) { }
+	void revealWaterpower() {
+		cout << "Waterbolt: " << power << endl;
+	}
+};
+
+class SpellJournal {
+public:
+	static string journal;
+	static string read() {
+		return journal;
+	}
+};
+string SpellJournal::journal = "";
+
+int LCSL(const string& s1, const string& s2)
 {
-    std::cout << "Hello World!\n";
+	const int m = s1.length();
+	const int n = s2.length();
+	vector<int> L(m*n, 0);
+	for (int i = 0; i < m; ++i)
+		for (int j = 0; j < n; ++j)
+			if (s1[i] == s2[j])
+				L[n*i + j] = ((i == 0 || j == 0) ? 0 : L[n*(i-1) + j-1]) + 1;
+			else
+				L[n*i + j] = max(i == 0? 0 : L[n*(i-1) + j], j == 0? 0 : L[n*i + j-1]);
+	return L[m*n - 1];
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+void counterspell(Spell *spell) 
+{
+	if (Fireball* fireball = dynamic_cast<Fireball*>(spell))
+	{
+		fireball->revealFirepower();
+	}
+	else if (Frostbite* frostbite = dynamic_cast<Frostbite*>(spell))
+	{
+		frostbite->revealFrostpower();
+	}
+	else if (Thunderstorm* thunderstorm = dynamic_cast<Thunderstorm*>(spell))
+	{
+		thunderstorm->revealThunderpower();
+	}
+	else if (Waterbolt* waterbolt = dynamic_cast<Waterbolt*>(spell))
+	{
+		waterbolt->revealWaterpower();
+	}
+	else
+	{
+		cout << LCSL(spell->revealScrollName(), SpellJournal::read());
+	}
+}
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+class Wizard {
+public:
+	Spell *cast() {
+		Spell *spell;
+		string s; cin >> s;
+		int power; cin >> power;
+		if (s == "fire") {
+			spell = new Fireball(power);
+		}
+		else if (s == "frost") {
+			spell = new Frostbite(power);
+		}
+		else if (s == "water") {
+			spell = new Waterbolt(power);
+		}
+		else if (s == "thunder") {
+			spell = new Thunderstorm(power);
+		}
+		else {
+			spell = new Spell(s);
+			cin >> SpellJournal::journal;
+		}
+		return spell;
+	}
+};
+
+int main() 
+{
+	int T;
+	cin >> T;
+	Wizard Arawn;
+	while (T--) {
+		Spell *spell = Arawn.cast();
+		counterspell(spell);
+	}
+	return 0;
+}
